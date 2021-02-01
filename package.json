@@ -1,0 +1,28 @@
+{
+  "name": "exp-pg-vue-elui",
+  "version": "1.0.0",
+  "description": "Вивчення взаємодії express.js vue.js PosteGreSQL",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "server": "nodemon app.js",
+    "client": "npm run serve --prefix ./client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "keywords": [
+    "express",
+    "vue",
+    "postgresql"
+  ],
+  "author": "Гончаренко Дмитро <goncharenkodi@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "config": "^3.3.2",
+    "express": "^4.17.1",
+    "pg": "^8.5.1"
+  },
+  "devDependencies": {
+    "concurrently": "^5.3.0",
+    "nodemon": "^2.0.6"
+  }
+}

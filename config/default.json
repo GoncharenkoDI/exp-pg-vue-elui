@@ -1,0 +1,9 @@
+{
+  "port": 5000,
+  "db": {
+    "user": "root",
+    "host": "localhost",
+    "database": "mydb",
+    "password": "221290"
+  }
+}
