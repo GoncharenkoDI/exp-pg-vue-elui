@@ -20,7 +20,6 @@ export default {
     currentRoute() {
       const layoutName = this.$route.meta.layout || 'main'
       this.currentLayout = layoutName + '-layout'
-      console.log(this.currentLayout)
     }
   },
   components: { MainLayout, EmptyLayout }
