@@ -12,13 +12,6 @@
             label-width="120px"
             @submit.native.prevent="onSubmit"
           >
-            <el-form-item label="Activity name">
-              <el-input
-                v-model="form.name"
-                clearable
-                prefix-icon="el-icon-user"
-              ></el-input>
-            </el-form-item>
             <el-form-item label="Email">
               <el-input
                 v-model="form.email"
@@ -60,7 +53,14 @@ export default {
   }),
   methods: {
     onSubmit() {
-      console.log('submit!!!!!!!!!!')
+      try {
+        this.$store.dispatch('login', {
+          email: this.form.email,
+          password: this.form.password
+        })
+      } catch (error) {
+        console.log('onSubmit error:', error)
+      }
     }
   }
 }
