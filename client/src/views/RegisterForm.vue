@@ -4,7 +4,16 @@
       <el-col :span="12" :offset="6">
         <el-card>
           <div slot="header">
-            <h2>Вхід до програми</h2>
+            <div slot="header">
+              <h2>Реєстрація користувача</h2>
+              <el-button
+                plain
+                icon="el-icon-s-home"
+                id="btn-home"
+                @click="$router.push('/')"
+              >
+              </el-button>
+            </div>
           </div>
           <el-form
             ref="form"
@@ -39,10 +48,6 @@
                 Зареєструватися&nbsp;
                 <i class="el-icon-s-promotion icon-right"></i>
               </el-button>
-              <el-button type="danger" native-type="submit">
-                Відмова&nbsp;
-                <i class="el-icon-error icon-right"></i>
-              </el-button>
               <el-button type="text" icon="el-icon-unlock">Ввійти</el-button>
             </div>
           </el-form>
@@ -64,7 +69,40 @@ export default {
   }),
   methods: {
     onSubmit() {
-      console.log('submit!!!!!!!!!!')
+      let message = ''
+      try {
+        this.$store.dispatch('user/register', {
+          email: this.form.email,
+          password: this.form.password,
+          name: this.form.name
+        })
+        this.$message({
+          showClose: true,
+          type: 'success',
+          dangerouslyUseHTMLString: true,
+          message: 'Ви успішно зареєстровані в системі'
+        })
+      } catch (error) {
+        console.log('onSubmit error:', error)
+        if (error.type) {
+          message = message + `<li>Тип помилки: ${error.type}</li>`
+        }
+        if (error.status) {
+          message = message + `<li>Статус помилки: ${error.status}</li>`
+        }
+        if (error.message) {
+          message = message + `<li>Повідомлення: ${error.message}</li>`
+        }
+        if (message.length === 0) {
+          message = '<li>Невідома помилка</li>'
+        }
+        this.$message({
+          showClose: true,
+          type: 'error',
+          dangerouslyUseHTMLString: true,
+          message
+        })
+      }
     }
   }
 }
@@ -73,5 +111,15 @@ export default {
 h2 {
   margin: 0 auto;
   text-align: center;
+  line-height: 2.5rem;
+}
+.el-card__header > div {
+  position: relative;
+  height: 2.5rem;
+}
+#btn-home {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

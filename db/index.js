@@ -10,8 +10,9 @@ module.exports = {
     )
     const values = Object.values(params)
     const retStr = returning ? ` RETURNING ${returning}` : ''
-    const text = `INSERT INTO ${table}(${fields.join()}) VALUES(${queryParams.join()})${retStr}`
-
+    const text = `INSERT INTO ${table} (${fields.join()}) VALUES (${queryParams.join()})${retStr}`
+    console.log('text', text)
+    console.log('values', values)
     return pool.query(text, values)
   }
 }

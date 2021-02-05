@@ -5,6 +5,13 @@
         <el-card>
           <div slot="header">
             <h2>Вхід до програми</h2>
+            <el-button
+              plain
+              icon="el-icon-s-home"
+              id="btn-home"
+              @click="$router.push('/')"
+            >
+            </el-button>
           </div>
           <el-form
             ref="form"
@@ -53,13 +60,38 @@ export default {
   }),
   methods: {
     onSubmit() {
+      let message = ''
       try {
-        this.$store.dispatch('login', {
+        this.$store.dispatch('auth/login', {
           email: this.form.email,
           password: this.form.password
         })
+        this.$message({
+          showClose: true,
+          type: 'success',
+          dangerouslyUseHTMLString: true,
+          message: 'Ви успішно ввійшли в систему'
+        })
       } catch (error) {
         console.log('onSubmit error:', error)
+        if (error.type) {
+          message = message + `<li>Тип помилки: ${error.type}</li>`
+        }
+        if (error.status) {
+          message = message + `<li>Статус помилки: ${error.status}</li>`
+        }
+        if (error.message) {
+          message = message + `<li>Повідомлення: ${error.message}</li>`
+        }
+        if (message.length === 0) {
+          message = '<li>Невідома помилка</li>'
+        }
+        this.$message({
+          showClose: true,
+          type: 'error',
+          dangerouslyUseHTMLString: true,
+          message
+        })
       }
     }
   }
@@ -69,5 +101,15 @@ export default {
 h2 {
   margin: 0 auto;
   text-align: center;
+  line-height: 2.5rem;
+}
+.el-card__header > div {
+  position: relative;
+  height: 2.5rem;
+}
+#btn-home {
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 </style>

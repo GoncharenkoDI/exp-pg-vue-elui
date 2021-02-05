@@ -5,16 +5,17 @@ export default {
   },
   mutations: {},
   actions: {
-    login({ dispatch, commit }, { email, password }) {
+    register({ dispatch, commit }, { email, password, name }) {
       try {
         dispatch(
           'http/request',
           {
-            url: '/api/auth/login',
+            url: '/api/users/register',
             method: 'POST',
             data: {
               email,
-              password
+              password,
+              name
             },
             headers: {
               'Content-type': 'application/json'
@@ -25,7 +26,7 @@ export default {
           }
         )
       } catch (error) {
-        console.log('login error', error)
+        console.log('register error', error)
         throw error
       }
     }

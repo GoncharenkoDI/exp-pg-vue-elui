@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 
 import auth from './auth'
 import http from './http'
+import user from './user'
 
 Vue.use(Vuex)
 
@@ -12,6 +13,7 @@ export default new Vuex.Store({
   actions: {},
   modules: {
     auth,
-    http
+    http,
+    user
   }
 })

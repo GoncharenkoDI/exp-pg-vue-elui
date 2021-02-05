@@ -1,4 +1,5 @@
 export default {
+  namespaced: true,
   state: {},
   mutations: {},
   actions: {
@@ -7,7 +8,6 @@ export default {
       { url, method = 'GET', data, headers = {} }
     ) {
       try {
-        console.log(url, { method, data, headers })
         let body = JSON.stringify({})
         if (data) {
           body = JSON.stringify(data)
