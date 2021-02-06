@@ -10,7 +10,7 @@ export default {
         dispatch(
           'http/request',
           {
-            url: '/api/users/register',
+            url: '/api/user/register',
             method: 'POST',
             data: {
               email,

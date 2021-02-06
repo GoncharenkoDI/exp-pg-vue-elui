@@ -1,7 +1,7 @@
 {
   "port": 5000,
   "db": {
-    "user": "root",
+    "user": "postgres",
     "host": "localhost",
     "database": "mydb",
     "password": "221290"

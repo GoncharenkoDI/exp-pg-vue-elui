@@ -14,9 +14,9 @@ router.post('/register', async (req, res) => {
   try {
     //отримати з req.body {email, password,name }
     const { email, password, name } = req.body
-    const result = await db.insert('users', { email, password }, 'id,')
-    console.log('result', result)
-    res.send(JSON.stringify({ uuid: result, email, password }))
+    const result = await db.insert('users', { email, password }, 'id')
+    console.log('uuid', result.rows[0].id)
+    res.send(JSON.stringify({ uuid: result.rows[0].id, email, password }))
   } catch (error) {
     console.log('POST /api/user/register error: ', error)
     res.status(500).send(JSON.stringify(error))
