@@ -7,24 +7,39 @@ module.exports = {
       const result = await pool.query(text, params)
       return result
     } catch (error) {
-      console.log('Query error: ', error.message)
+      console.log('Query error: ', error)
+      error.source = 'db query error'
       throw error
     }
   },
-  insert: async (table, params, returning = '') => {
+  insert: async (table, fields, returning = '') => {
     try {
-      const fields = Object.keys(params)
-      const queryParams = Object.keys(params).map(
+      const fieldsName = Object.keys(fields)
+      const queryParams = Object.keys(fields).map(
         (value, index) => `$${index + 1}`
       )
-      const values = Object.values(params)
+      const values = Object.values(fields)
       const retStr = returning ? ` RETURNING ${returning}` : ''
-      const text = `INSERT INTO ${table} (${fields.join()}) VALUES (${queryParams.join()})${retStr}`
-      console.log('text: ', text)
-      console.log('values: ', values)
+      const text = `INSERT INTO ${table} (${fieldsName.join()}) VALUES (${queryParams.join()})${retStr}`
       return await pool.query(text, values)
     } catch (error) {
-      console.log('Query error: ', error)
+      console.log('insert error: ', error)
+      error.source = 'db insert error'
+      throw error
+    }
+  },
+  update: async (table, fields, params) => {
+    try {
+      const fieldsName = Object.keys(fields)
+      const queryParams = Object.keys(fields).map(
+        (value, index) => `$${index + 1}`
+      )
+      const values = Object.values(fields)
+      const text = `INSERT INTO ${table} (${fieldsName.join()}) VALUES (${queryParams.join()})${retStr}`
+      return await pool.query(text, values)
+    } catch (error) {
+      console.log('update error: ', error)
+      error.source = 'db update error'
       throw error
     }
   }

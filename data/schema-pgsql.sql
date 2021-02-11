@@ -28,7 +28,8 @@ CREATE TABLE public.users
     token character varying(1024) COLLATE pg_catalog."default",
     create_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT users_pk PRIMARY KEY (id)
+    CONSTRAINT users_pk PRIMARY KEY (id),
+    CONSTRAINT email_unique UNIQUE (email)
 )
 
 TABLESPACE pg_default;

@@ -18,8 +18,14 @@ router.post('/register', async (req, res) => {
     console.log('uuid', result.rows[0].id)
     res.send(JSON.stringify({ uuid: result.rows[0].id, email, password }))
   } catch (error) {
-    console.log('POST /api/user/register error: ', error)
-    res.status(500).send(JSON.stringify(error))
+    const resObj = { message: error.message || 'Невідома помилка' }
+    if (!error.source) {
+      resObj.source = 'POST /api/user/register'
+      console.log('POST /api/user/register error: ', error)
+    } else {
+      resObj.source = error.source
+    }
+    res.status(500).send(JSON.stringify(resObj))
   }
 })
 

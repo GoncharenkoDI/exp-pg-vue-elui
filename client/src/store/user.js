@@ -5,28 +5,20 @@ export default {
   },
   mutations: {},
   actions: {
-    register({ dispatch, commit }, { email, password, name }) {
+    async register({ dispatch, commit }, { email, password, name }) {
       try {
-        dispatch(
+        await dispatch(
           'http/request',
           {
             url: '/api/user/register',
             method: 'POST',
-            data: {
-              email,
-              password,
-              name
-            },
-            headers: {
-              'Content-type': 'application/json'
-            }
+            data: { email, password, name },
+            headers: { 'Content-Type': 'application/json' }
           },
-          {
-            root: true
-          }
+          { root: true }
         )
       } catch (error) {
-        console.log('register error', error)
+        console.log('store register error', error)
         throw error
       }
     }

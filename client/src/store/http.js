@@ -8,22 +8,30 @@ export default {
       { url, method = 'GET', data, headers = {} }
     ) {
       try {
-        let body = JSON.stringify({})
-        if (data) {
+        console.log('data', data)
+        console.log('headers.Content-Type', headers['Content-Type'])
+        let body = {}
+        if (
+          data &&
+          headers['Content-Type'] &&
+          headers['Content-Type'] == 'application/json'
+        ) {
           body = JSON.stringify(data)
+          console.log(body)
         }
 
         const response = await fetch(url, { method, body, headers })
         const result = await response.json()
         if (!response.ok) {
-          const httpError = new Error(result.message)
-          httpError.type = 'http error'
-          httpError.status = response.status
-          throw httpError
+          console.log('httpError')
+          console.log('http result', result.message)
+
+          throw new Error('http error')
         }
         return result
       } catch (error) {
         console.log('request error:', error)
+        console.log('request error type:', error.type)
         throw error
       }
     }

@@ -68,10 +68,10 @@ export default {
     }
   }),
   methods: {
-    onSubmit() {
+    async onSubmit() {
       let message = ''
       try {
-        this.$store.dispatch('user/register', {
+        await this.$store.dispatch('user/register', {
           email: this.form.email,
           password: this.form.password,
           name: this.form.name
