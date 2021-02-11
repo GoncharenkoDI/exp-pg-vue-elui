@@ -8,8 +8,6 @@ export default {
       { url, method = 'GET', data, headers = {} }
     ) {
       try {
-        console.log('data', data)
-        console.log('headers.Content-Type', headers['Content-Type'])
         let body = {}
         if (
           data &&
@@ -17,21 +15,29 @@ export default {
           headers['Content-Type'] == 'application/json'
         ) {
           body = JSON.stringify(data)
-          console.log(body)
         }
 
         const response = await fetch(url, { method, body, headers })
         const result = await response.json()
         if (!response.ok) {
-          console.log('httpError')
-          console.log('http result', result.message)
-
-          throw new Error('http error')
+          const errorObj = new Error(result.message)
+          errorObj.sender = 'api server'
+          if (result.source) {
+            errorObj.source = result.source
+          } else {
+            errorObj.source = `http error: ${response.statusText}`
+          }
+          throw errorObj
         }
         return result
       } catch (error) {
         console.log('request error:', error)
-        console.log('request error type:', error.type)
+        if (!error.sender) {
+          error.sender = 'client'
+        }
+        if (!error.source) {
+          error.source = 'http request'
+        }
         throw error
       }
     }

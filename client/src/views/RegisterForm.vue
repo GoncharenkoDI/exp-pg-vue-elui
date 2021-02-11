@@ -83,18 +83,24 @@ export default {
           message: 'Ви успішно зареєстровані в системі'
         })
       } catch (error) {
-        console.log('onSubmit error:', error)
-        if (error.type) {
-          message = message + `<li>Тип помилки: ${error.type}</li>`
+        if (!error.sender) {
+          console.log('onSubmit error:', error)
+          error.sender = 'client'
         }
-        if (error.status) {
-          message = message + `<li>Статус помилки: ${error.status}</li>`
+        if (!error.source) {
+          error.source = 'store user register'
+        }
+        if (error.sender) {
+          message = message + `<li>Відправник помилки: ${error.sender}</li>`
+        }
+        if (error.source) {
+          message = message + `<li>Джерело помилки: ${error.source}</li>`
         }
         if (error.message) {
           message = message + `<li>Повідомлення: ${error.message}</li>`
         }
         if (message.length === 0) {
-          message = '<li>Невідома помилка</li>'
+          message = '<li>Повідомлення: Невідома помилка</li>'
         }
         this.$message({
           showClose: true,

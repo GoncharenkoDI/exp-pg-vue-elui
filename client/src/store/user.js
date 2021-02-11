@@ -18,7 +18,13 @@ export default {
           { root: true }
         )
       } catch (error) {
-        console.log('store register error', error)
+        if (!error.sender) {
+          error.sender = 'client'
+          console.log('register error:', error)
+        }
+        if (!error.source) {
+          error.source = 'store user register'
+        }
         throw error
       }
     }
