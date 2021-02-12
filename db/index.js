@@ -8,6 +8,7 @@ module.exports = {
       return result
     } catch (error) {
       console.log('Query error: ', error)
+      error.sender = 'server'
       error.source = 'db query error'
       throw error
     }
@@ -24,6 +25,7 @@ module.exports = {
       return await pool.query(text, values)
     } catch (error) {
       console.log('insert error: ', error)
+      error.sender = 'server'
       error.source = 'db insert error'
       throw error
     }
@@ -39,7 +41,8 @@ module.exports = {
       return await pool.query(text, values)
     } catch (error) {
       console.log('update error: ', error)
-      error.source = 'db update error'
+      error.sender = 'server'
+      error.source = 'db insert error'
       throw error
     }
   }

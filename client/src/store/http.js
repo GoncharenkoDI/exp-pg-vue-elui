@@ -5,16 +5,15 @@ export default {
   actions: {
     async request(
       { dispatch, commit },
-      { url, method = 'GET', data, headers = {} }
+      { url, method = 'GET', data = {}, headers = {} }
     ) {
       try {
-        let body = {}
         if (
           data &&
           headers['Content-Type'] &&
           headers['Content-Type'] == 'application/json'
         ) {
-          body = JSON.stringify(data)
+          const body = JSON.stringify(data)
         }
 
         const response = await fetch(url, { method, body, headers })
