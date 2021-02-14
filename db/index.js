@@ -30,15 +30,14 @@ module.exports = {
       throw error
     }
   },
-  update: async (table, fields, params) => {
+  update: async (table, fields, where, params) => {
     try {
-      const fieldsName = Object.keys(fields)
-      const queryParams = Object.keys(fields).map(
-        (value, index) => `$${index + 1}`
-      )
-      const values = Object.values(fields)
-      const text = `INSERT INTO ${table} (${fieldsName.join()}) VALUES (${queryParams.join()})${retStr}`
-      return await pool.query(text, values)
+      const fieldsSet = Object.keys(fields)
+        .map((field, index) => `${field} = $${index + 1}`)
+        .join()
+      const text = `UPDATE ${table} SET ${fieldsSet} WHERE ${where}`
+
+      return await pool.query(text, [...Object.values(fields), ...params])
     } catch (error) {
       console.log('update error: ', error)
       error.sender = 'server'

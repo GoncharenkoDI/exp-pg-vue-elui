@@ -23,4 +23,18 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+router.put('/:id', async (req, res) => {
+  try {
+    const { id } = req.params
+    const { rows } = await db.query('SELECT * FROM test_table WHERE id = $1', [
+      id
+    ])
+
+    res.send(JSON.stringify(rows[0]))
+  } catch (error) {
+    console.log(error)
+    res.status(500).send(JSON.stringify(error))
+  }
+})
+
 module.exports = router

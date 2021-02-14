@@ -9,14 +9,16 @@ const router = express.Router()
 
 /** реєстрація нового користувача
  * @method POST
- * uri /api/user/register
+ * @uri /api/user/register
+ * @return status = 201 { uuid, email } || status = 500 { message, sender, source}
  */
 router.post('/register', async (req, res) => {
   try {
     //отримати з req.body {email, password,name }
+    // eslint-disable-next-line no-unused-vars
     const { email, password, name } = req.body
     const result = await db.insert('users', { email, password }, 'id')
-    res.send(JSON.stringify({ uuid: result.rows[0].id, email, password }))
+    res.status(201).send(JSON.stringify({ uuid: result.rows[0].id, email }))
   } catch (error) {
     if (!error.sender) {
       console.log('POST /api/user/register error: ', error)
@@ -31,8 +33,8 @@ router.post('/register', async (req, res) => {
 })
 
 /** Перелік всіх користувачів
- *@method GET
- * uri /api/user/
+ * @method GET
+ * @uri /api/user/
  */
 router.get('/', async (req, res) => {
   try {
@@ -46,7 +48,7 @@ router.get('/', async (req, res) => {
 
 /** інформація про користувача за id
  *@method GET
- * uri /api/user/id
+ * @uri /api/user/id
  */
 router.get('/:id', async (req, res) => {
   try {
@@ -60,6 +62,10 @@ router.get('/:id', async (req, res) => {
   }
 })
 
+/** видалення інформації про користувача за id
+ *@method delete
+ * @uri /api/user/id
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const { id } = req.params
