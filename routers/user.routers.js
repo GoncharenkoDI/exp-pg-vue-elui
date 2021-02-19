@@ -14,9 +14,26 @@ const router = express.Router()
  */
 router.post('/register', async (req, res) => {
   try {
-    //отримати з req.body {email, password,name }
+    //отримати з req.body {email, password,name, fingerprint }
+    //
     // eslint-disable-next-line no-unused-vars
-    const { email, password, name } = req.body
+    const { email, password, name, fingerprint } = req.body
+    // записати в межах одної транзакції
+    // створити запис в таблиці users { email, password} отримати uuid
+    // створити запис в таблиці auth_assignment {user_id: uuid, item_name: 'public' }
+    // ip = req.ip
+    // ua = req.get('User-Agent')
+    /*user_id uuid NOT NULL,
+    refresh_token uuid NOT NULL,
+    user_agent character varying(200) COLLATE pg_catalog."default" NOT NULL,
+    fingerprint character varying(200) COLLATE pg_catalog."default" NOT NULL,
+    ip character varying(15) COLLATE pg_catalog."default" NOT NULL,
+    expires_in */
+    // видалити протерміновані сесії delete from public.refreshsessions where expires_in < CURRENT_TIMESTAMP
+    // створити нову сесію в таблиці refreshsessions
+    // expires_in = new Date(Date.now() + 8*3600000)
+    // {user_id: uuid,  user_agent: ua, fingerprint, ip,  expires_in: new Date(Date.now() + 8*3600000)}
+
     const result = await db.insert('users', { email, password }, 'id')
     res.status(201).send(JSON.stringify({ uuid: result.rows[0].id, email }))
   } catch (error) {

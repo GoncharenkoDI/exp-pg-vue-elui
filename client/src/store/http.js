@@ -8,12 +8,13 @@ export default {
       { url, method = 'GET', data = {}, headers = {} }
     ) {
       try {
+        let body = data
         if (
           data &&
           headers['Content-Type'] &&
           headers['Content-Type'] == 'application/json'
         ) {
-          const body = JSON.stringify(data)
+          body = JSON.stringify(data)
         }
 
         const response = await fetch(url, { method, body, headers })

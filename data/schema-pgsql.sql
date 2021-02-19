@@ -45,15 +45,19 @@ ALTER TABLE public.users
 оновлюється, POST/api/auth/refresh
 видаляється POST/api/auth/logout/ body {user_id, fingerprint, refresh_token}
 */
+-- Table: public.refreshsessions
+
+-- DROP TABLE public.refreshsessions;
+
 CREATE TABLE public.refreshsessions
 (
-    id integer NOT NULL DEFAULT nextval('public.refreshsessions_id_seq'::regclass),
+    id integer NOT NULL DEFAULT nextval('refreshsessions_id_seq'::regclass),
     user_id uuid NOT NULL,
-    refresh_token uuid NOT NULL,
+    refresh_token uuid NOT NULL DEFAULT gen_random_uuid(),
     user_agent character varying(200) COLLATE pg_catalog."default" NOT NULL,
     fingerprint character varying(200) COLLATE pg_catalog."default" NOT NULL,
     ip character varying(15) COLLATE pg_catalog."default" NOT NULL,
-    expires_in bigint NOT NULL,
+    expires_in timestamp with time zone NOT NULL,
     create_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT refreshsessions_pkey PRIMARY KEY (id),

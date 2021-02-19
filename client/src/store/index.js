@@ -8,11 +8,6 @@ import user from './user'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {},
-  mutations: {},
-  actions: {
-    testDB({}) {}
-  },
   modules: {
     auth,
     http,

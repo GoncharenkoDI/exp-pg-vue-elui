@@ -7,12 +7,13 @@ export default {
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
+        const fingerprint = await (await this.$fingerprint).get()
         await dispatch(
           'http/request',
           {
             url: '/api/user/register',
             method: 'POST',
-            data: { email, password, name },
+            data: { email, password, name, fingerprint },
             headers: { 'Content-Type': 'application/json' }
           },
           { root: true }
