@@ -5,5 +5,12 @@
     "host": "localhost",
     "database": "mydb",
     "password": "221290"
+  },
+  "jwt": {
+    "secret": "нудужесектентеслово",
+    "expiresIn": "1h"
+  },
+  "bcrypt": {
+    "saltRounds": 10
   }
 }

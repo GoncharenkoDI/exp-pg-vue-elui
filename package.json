@@ -17,8 +17,10 @@
   "author": "Гончаренко Дмитро <goncharenkodi@gmail.com>",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.0",
     "config": "^3.3.2",
     "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
     "pg": "^8.5.1"
   },
   "devDependencies": {

@@ -1,8 +1,10 @@
--- Table: public.users
 
 DROP TABLE IF EXISTS public.refreshsessions;
+drop table if exists public.auth_assignment;
+drop table if exists public.auth_item_child;
+drop table if exists public.auth_item;
+DROP TABLE IF EXISTS public.auth_rule;
 DROP TABLE IF EXISTS public.users;
-
 -- SEQUENCE: public.refreshsessions_id_seq
 
 DROP SEQUENCE IF EXISTS public.refreshsessions_id_seq;
@@ -16,6 +18,7 @@ CREATE SEQUENCE public.refreshsessions_id_seq
 
 ALTER SEQUENCE public.refreshsessions_id_seq
     OWNER TO postgres;
+-- Table: public.users
 
 CREATE TABLE public.users
 (
@@ -40,14 +43,6 @@ ALTER TABLE public.users
 -- Table: public.refreshsessions
 
 -- DROP TABLE public.refreshsessions;
-/*
-Сессія створюється методом POST/api/auth/login
-оновлюється, POST/api/auth/refresh
-видаляється POST/api/auth/logout/ body {user_id, fingerprint, refresh_token}
-*/
--- Table: public.refreshsessions
-
--- DROP TABLE public.refreshsessions;
 
 CREATE TABLE public.refreshsessions
 (
@@ -56,7 +51,7 @@ CREATE TABLE public.refreshsessions
     refresh_token uuid NOT NULL DEFAULT gen_random_uuid(),
     user_agent character varying(200) COLLATE pg_catalog."default" NOT NULL,
     fingerprint character varying(200) COLLATE pg_catalog."default" NOT NULL,
-    ip character varying(15) COLLATE pg_catalog."default" NOT NULL,
+    ip character varying(120) COLLATE pg_catalog."default" NOT NULL,
     expires_in timestamp with time zone NOT NULL,
     create_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -72,10 +67,7 @@ TABLESPACE pg_default;
 ALTER TABLE public.refreshsessions
     OWNER to postgres;
 
-drop table if exists public.auth_assignment;
-drop table if exists public.auth_item_child;
-drop table if exists public.auth_item;
-DROP TABLE IF EXISTS public.auth_rule;
+
 
 -- Table: public.auth_rule
 

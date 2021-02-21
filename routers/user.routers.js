@@ -4,12 +4,17 @@
 //const { json } = require('express')
 const express = require('express')
 const db = require('../db')
+const config = require('config')
+
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 
 const router = express.Router()
 
 /** реєстрація нового користувача
  * @method POST
  * @uri /api/user/register
+ * @params { email, password, name, fingerprint } = req.body
  * @return status = 201 { uuid, email } || status = 500 { message, sender, source}
  */
 router.post('/register', async (req, res) => {
@@ -18,24 +23,95 @@ router.post('/register', async (req, res) => {
     //
     // eslint-disable-next-line no-unused-vars
     const { email, password, name, fingerprint } = req.body
-    // записати в межах одної транзакції
-    // створити запис в таблиці users { email, password} отримати uuid
-    // створити запис в таблиці auth_assignment {user_id: uuid, item_name: 'public' }
-    // ip = req.ip
-    // ua = req.get('User-Agent')
-    /*user_id uuid NOT NULL,
-    refresh_token uuid NOT NULL,
-    user_agent character varying(200) COLLATE pg_catalog."default" NOT NULL,
-    fingerprint character varying(200) COLLATE pg_catalog."default" NOT NULL,
-    ip character varying(15) COLLATE pg_catalog."default" NOT NULL,
-    expires_in */
-    // видалити протерміновані сесії delete from public.refreshsessions where expires_in < CURRENT_TIMESTAMP
-    // створити нову сесію в таблиці refreshsessions
-    // expires_in = new Date(Date.now() + 8*3600000)
-    // {user_id: uuid,  user_agent: ua, fingerprint, ip,  expires_in: new Date(Date.now() + 8*3600000)}
+    const jwtOptions = config.get('jwt')
+    const ip = req.ip
+    const ua = req.get('User-Agent')
 
-    const result = await db.insert('users', { email, password }, 'id')
-    res.status(201).send(JSON.stringify({ uuid: result.rows[0].id, email }))
+    // створити access-token
+
+    // записати в межах одної транзакції
+    let result
+    let message
+    let registerError
+    let refreshToken
+    let userId
+    const client = await db.getClient()
+    try {
+      await db.startTransaction(client)
+      const saltRounds = +config.get('bcrypt').saltRounds
+      const hashedPassword = await bcrypt.hash(password, saltRounds)
+      // створити запис в таблиці users { email, password} отримати uuid як userId
+      result = await db.clientInsert(
+        client,
+        'users',
+        { email, password: hashedPassword },
+        'id'
+      )
+      if (result.rows.length === 0) {
+        message = 'Не вдалось створити користувача.'
+        console.log('register error: ', message)
+        registerError = new Error(message)
+        registerError.sender = 'server'
+        registerError.source = 'POST /api/user/register error'
+        throw registerError
+      }
+      userId = result.rows[0].id
+      // створити запис в таблиці auth_assignment {user_id, item_name: 'public' }
+      result = await db.clientInsert(
+        client,
+        'auth_assignment',
+        { user_id: userId, item_name: 'user' },
+        'item_name'
+      )
+      if (result.rows.length === 0) {
+        message = 'Не вдалось надати користувачеві початкові повноваження.'
+        console.log('register error: ', message)
+        registerError = new Error(message)
+        registerError.sender = 'server'
+        registerError.source = 'POST /api/user/register error'
+        throw registerError
+      }
+      // видалити протерміновані сесії delete from public.refreshsessions where expires_in < CURRENT_TIMESTAMP
+      await db.clientQuery(
+        client,
+        'DELETE FROM public.refreshsessions WHERE expires_in < CURRENT_TIMESTAMP'
+      )
+      // створити нову сесію в таблиці refreshsessions expires_in - 8 годин
+      // {user_id,  user_agent: ua, fingerprint, ip,  expires_in: new Date(Date.now() + 8*3600000)} отримати refresh_token
+      result = await db.clientInsert(
+        client,
+        'refreshsessions',
+        {
+          user_id: userId,
+          user_agent: ua,
+          fingerprint,
+          ip,
+          expires_in: new Date(Date.now() + 8 * 3600000)
+        },
+        'refresh_token'
+      )
+      if (result.rows.length === 0) {
+        message = 'Не вдалось створити користувача.'
+        console.log('register error: ', message)
+        registerError = new Error(message)
+        registerError.sender = 'server'
+        registerError.source = 'POST /api/user/register error'
+        throw registerError
+      }
+      refreshToken = result.rows[0].refresh_token
+      await db.commitTransaction(client)
+    } catch (error) {
+      await db.rollbackTransaction(client)
+      throw error
+    } finally {
+      client.release()
+    }
+
+    const accessToken = jwt.sign({ userId: userId }, jwtOptions.secret, {
+      expiresIn: jwtOptions.expiresIn
+    })
+
+    res.status(201).send(JSON.stringify({ accessToken, refreshToken }))
   } catch (error) {
     if (!error.sender) {
       console.log('POST /api/user/register error: ', error)

@@ -7,17 +7,18 @@ export default {
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
-        const fingerprint = await (await this.$fingerprint).get()
-        await dispatch(
+        const fp = await (await this._vm.$fingerprint).get()
+        const result = await dispatch(
           'http/request',
           {
             url: '/api/user/register',
             method: 'POST',
-            data: { email, password, name, fingerprint },
+            data: { email, password, name, fingerprint: fp.visitorId },
             headers: { 'Content-Type': 'application/json' }
           },
           { root: true }
         )
+        console.log('result: ', result)
       } catch (error) {
         if (!error.sender) {
           error.sender = 'client'
