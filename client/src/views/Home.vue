@@ -50,9 +50,6 @@ export default {
       tableData: [item]
     }
   },
-  async mounted() {
-    const fp = await (await this.$fingerprint).get()
-    console.log(fp.visitorId)
-  }
+  async mounted() {}
 }
 </script>

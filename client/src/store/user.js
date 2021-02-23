@@ -29,6 +29,17 @@ export default {
         }
         throw error
       }
+    },
+    async testUserByEmail({ dispatch }, { email }) {
+      try {
+        const response = await dispatch('http/request', {
+          url: `/api/user/test-email/${email}`
+        }) // true | false
+        return response
+      } catch (error) {
+        console.log('testUserByEmail error:', error)
+        throw error
+      }
     }
   }
 }

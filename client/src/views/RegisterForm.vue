@@ -1,5 +1,5 @@
 <template>
-  <div id="login-form">
+  <div id="register-form">
     <el-row>
       <el-col :span="12" :offset="6">
         <el-card>
@@ -18,8 +18,9 @@
           <el-form
             ref="form"
             :model="form"
-            label-width="120px"
+            label-width="10rem"
             @submit.native.prevent="onSubmit"
+            :disabled="httpLoading"
           >
             <el-form-item label="Activity name">
               <el-input
@@ -43,6 +44,14 @@
                 prefix-icon="el-icon-key"
               ></el-input>
             </el-form-item>
+            <el-form-item label="Підтвердження пароля">
+              <el-input
+                v-model="form.confirmPassword"
+                show-password
+                clearable
+                prefix-icon="el-icon-key"
+              ></el-input>
+            </el-form-item>
             <div>
               <el-button type="primary" native-type="submit">
                 Зареєструватися&nbsp;
@@ -58,16 +67,50 @@
 </template>
 
 <script>
+import { required, email, sameAs, minLength } from 'vuelidate/lib/validators'
 export default {
-  name: 'LoginForm',
+  name: 'RegisterForm',
   data: () => ({
     form: {
       name: '',
       email: '',
-      password: ''
+      password: '',
+      confirmPassword: ''
     }
   }),
+  validations: {
+    form: {
+      name: {
+        required,
+        minLength: minLength(6)
+      },
+      email: {
+        required,
+        email,
+        isUnique: async (value) => await this.isUnique(value)
+      },
+      password: {
+        required,
+        minLength: minLength(6)
+      },
+      confirmPassword: {
+        sameAsPassword: sameAs('userPassword')
+      }
+    }
+  },
+  computed: {
+    httpLoading() {
+      return this.$store.state.http.loading
+    }
+  },
   methods: {
+    async isUnique(email) {
+      if (email === '') return true
+      const response = Boolean(
+        await this.$store.dispatch('user/testUserByEmail', { email })
+      )
+      return !response
+    },
     async onSubmit() {
       let message = ''
       try {

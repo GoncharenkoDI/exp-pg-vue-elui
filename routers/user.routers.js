@@ -182,5 +182,22 @@ router.delete('/:id', async (req, res) => {
     res.status(500).send(JSON.stringify(resObj))
   }
 })
+/** видалення інформації про користувача за id
+ *@method get
+ * @uri /api/user/test-email/${email}
+ */
+router.get('/test-email/:email', async (req, res) => {
+  try {
+    const { email } = req.params
+    const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [
+      email
+    ])
+    const result = rows.length !== 0
+    res.send(JSON.stringify(result))
+  } catch (error) {
+    console.log(error)
+    res.status(500).send(JSON.stringify(error))
+  }
+})
 
 module.exports = router
