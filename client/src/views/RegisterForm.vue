@@ -1,5 +1,5 @@
 <template>
-  <div id="register-form">
+  <div id="register-form-div">
     <el-row>
       <el-col :span="12" :offset="6">
         <el-card>
@@ -16,18 +16,27 @@
             </div>
           </div>
           <el-form
-            ref="form"
+            ref="register-form"
+            status-icon
             :model="form"
             label-width="10rem"
             @submit.native.prevent="onSubmit"
             :disabled="httpLoading"
           >
-            <el-form-item label="Activity name">
+            <el-form-item label="Activity name" class="is-success">
               <el-input
                 v-model="form.name"
                 clearable
                 prefix-icon="el-icon-user"
+                @focus="$v.form.name.$reset()"
+                @blur="$v.form.name.$touch()"
               ></el-input>
+              <div
+                class="el-form-item__error"
+                v-if="this.$v.form.name.$dirty && !this.$v.form.name.required"
+              >
+                Введіть своє ім'я
+              </div>
             </el-form-item>
             <el-form-item label="Email">
               <el-input
@@ -94,7 +103,7 @@ export default {
         minLength: minLength(6)
       },
       confirmPassword: {
-        sameAsPassword: sameAs('userPassword')
+        sameAsPassword: sameAs('form.password')
       }
     }
   },
