@@ -22,30 +22,23 @@
             label-width="10rem"
             @submit.native.prevent="onSubmit"
             :disabled="httpLoading"
+            :rules="rules"
           >
-            <el-form-item label="Activity name" class="is-success">
+            <el-form-item label="Activity name" prop="name">
               <el-input
                 v-model="form.name"
                 clearable
                 prefix-icon="el-icon-user"
-                @focus="$v.form.name.$reset()"
-                @blur="$v.form.name.$touch()"
               ></el-input>
-              <div
-                class="el-form-item__error"
-                v-if="this.$v.form.name.$dirty && !this.$v.form.name.required"
-              >
-                Введіть своє ім'я
-              </div>
             </el-form-item>
-            <el-form-item label="Email">
+            <el-form-item label="Email" prop="email">
               <el-input
                 v-model="form.email"
                 clearable
                 prefix-icon="el-icon-message"
               ></el-input>
             </el-form-item>
-            <el-form-item label="Пароль">
+            <el-form-item label="Пароль" prop="password">
               <el-input
                 v-model="form.password"
                 show-password
@@ -53,7 +46,7 @@
                 prefix-icon="el-icon-key"
               ></el-input>
             </el-form-item>
-            <el-form-item label="Підтвердження пароля">
+            <el-form-item label="Підтвердження пароля" prop="confirmPassword">
               <el-input
                 v-model="form.confirmPassword"
                 show-password
@@ -76,34 +69,62 @@
 </template>
 
 <script>
-import { required, email, sameAs, minLength } from 'vuelidate/lib/validators'
 export default {
   name: 'RegisterForm',
-  data: () => ({
-    form: {
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
+  data() {
+    const checkConfirmPassword = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('Введіть пароль ще раз.'))
+      } else if (value !== this.form.password) {
+        callback(new Error('Введені значення не співпадають.'))
+      } else {
+        callback()
+      }
     }
-  }),
-  validations: {
-    form: {
-      name: {
-        required,
-        minLength: minLength(6)
+    const isUniqueEmail = async (rule, value, callback) => {
+      const check = await this.isUnique(value)
+      if (check) {
+        callback()
+      } else {
+        callback(new Error('Користувач з такою адресою вже зареєстрований.'))
+      }
+    }
+    return {
+      form: {
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
       },
-      email: {
-        required,
-        email,
-        isUnique: async value => await this.isUnique(value)
-      },
-      password: {
-        required,
-        minLength: minLength(6)
-      },
-      confirmPassword: {
-        sameAsPassword: sameAs('form.password')
+      rules: {
+        name: [
+          { required: true, message: "Введіть Ваше ім'я.", trigger: 'blur' }
+        ],
+        email: [
+          {
+            required: true,
+            message: 'Введіть особисту email адресу.',
+            trigger: 'blur'
+          },
+          {
+            type: 'email',
+            message: 'Введіть коректну email адресу',
+            trigger: ['blur', 'change']
+          },
+          {
+            validator: isUniqueEmail,
+            trigger: ['blur']
+          }
+        ],
+        password: [
+          { required: true, message: 'Введіть пароль.', trigger: 'blur' }
+        ],
+        confirmPassword: [
+          {
+            validator: checkConfirmPassword,
+            trigger: 'blur'
+          }
+        ]
       }
     }
   },

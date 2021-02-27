@@ -32,9 +32,14 @@ export default {
     },
     async testUserByEmail({ dispatch }, { email }) {
       try {
-        const response = await dispatch('http/request', {
-          url: `/api/user/test-email/${email}`
-        }) // true | false
+        const response = await dispatch(
+          'http/request',
+          {
+            // true | false
+            url: `/api/user/test-email/${email}`
+          },
+          { root: true }
+        )
         return response
       } catch (error) {
         console.log('testUserByEmail error:', error)
