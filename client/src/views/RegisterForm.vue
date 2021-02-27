@@ -96,7 +96,7 @@ export default {
       email: {
         required,
         email,
-        isUnique: async (value) => await this.isUnique(value)
+        isUnique: async value => await this.isUnique(value)
       },
       password: {
         required,
