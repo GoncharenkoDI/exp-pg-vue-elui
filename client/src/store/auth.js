@@ -1,9 +1,22 @@
 export default {
   namespaced: true,
   state: {
-    currentUser: null
+    accessToken: null, //{token, userId, expiresIn}
+    refreshToken: null //{token, expiresIn}
   },
-  mutations: {},
+  mutations: {
+    setAccessToken(state, accessToken) {
+      state.accessToken = accessToken
+    },
+    setRefreshToken(state, refreshToken) {
+      state.refreshToken = refreshToken
+      if (refreshToken && Object.keys(refreshToken).length) {
+        localStorage.setItem('refreshToken', JSON.stringify(refreshToken))
+      } else {
+        localStorage.removeItem('refreshToken')
+      }
+    }
+  },
   actions: {
     login({ dispatch, commit }, { email, password }) {
       try {

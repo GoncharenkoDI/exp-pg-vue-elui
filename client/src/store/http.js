@@ -6,7 +6,6 @@ export default {
   mutations: {
     setLoading(state, loading) {
       state.loading = loading
-      console.log('loading', loading)
     }
   },
   actions: {
@@ -16,13 +15,16 @@ export default {
     ) {
       commit('setLoading', true)
       try {
-        let body = data
-        if (
-          data &&
-          headers['Content-Type'] &&
-          headers['Content-Type'] == 'application/json'
-        ) {
-          body = JSON.stringify(data)
+        let body
+        if (Object.keys(data).length) {
+          if (
+            headers['Content-Type'] &&
+            headers['Content-Type'] == 'application/json'
+          ) {
+            body = JSON.stringify(data)
+          } else {
+            body = data
+          }
         }
 
         const response = await fetch(url, { method, body, headers })

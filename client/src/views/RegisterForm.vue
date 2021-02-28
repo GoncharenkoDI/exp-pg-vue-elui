@@ -11,6 +11,7 @@
                 icon="el-icon-s-home"
                 id="btn-home"
                 @click="$router.push('/')"
+                :disabled="httpLoading"
               >
               </el-button>
             </div>
@@ -21,7 +22,6 @@
             :model="form"
             label-width="10rem"
             @submit.native.prevent="onSubmit"
-            :disabled="httpLoading"
             :rules="rules"
           >
             <el-form-item label="Activity name" prop="name">
@@ -55,11 +55,21 @@
               ></el-input>
             </el-form-item>
             <div>
-              <el-button type="primary" native-type="submit">
+              <el-button
+                type="primary"
+                native-type="submit"
+                :disabled="httpLoading"
+              >
                 Зареєструватися&nbsp;
                 <i class="el-icon-s-promotion icon-right"></i>
               </el-button>
-              <el-button type="text" icon="el-icon-unlock">Ввійти</el-button>
+              <el-button
+                type="text"
+                icon="el-icon-unlock"
+                :disabled="httpLoading"
+              >
+                Ввійти
+              </el-button>
             </div>
           </el-form>
         </el-card>
@@ -109,7 +119,7 @@ export default {
           {
             type: 'email',
             message: 'Введіть коректну email адресу',
-            trigger: ['blur', 'change']
+            trigger: 'blur'
           },
           {
             validator: isUniqueEmail,
@@ -143,18 +153,39 @@ export default {
     },
     async onSubmit() {
       let message = ''
+      let isValidate
       try {
-        await this.$store.dispatch('user/register', {
-          email: this.form.email,
-          password: this.form.password,
-          name: this.form.name
-        })
-        this.$message({
-          showClose: true,
-          type: 'success',
-          dangerouslyUseHTMLString: true,
-          message: 'Ви успішно зареєстровані в системі'
-        })
+        try {
+          await this.$refs['register-form'].validate()
+          isValidate = true
+        } catch (error) {
+          isValidate = false
+        }
+        if (isValidate) {
+          await this.$store.dispatch('user/register', {
+            email: this.form.email,
+            password: this.form.password,
+            name: this.form.name
+          })
+          this.$message({
+            showClose: true,
+            type: 'success',
+            dangerouslyUseHTMLString: true,
+            message: 'Ви успішно зареєстровані в системі'
+          })
+          this.form.name = ''
+          this.form.email = ''
+          this.form.password = ''
+          this.form.confirmPassword = ''
+          this.$router.push('/')
+        } else {
+          this.$message({
+            showClose: true,
+            type: 'error',
+            dangerouslyUseHTMLString: true,
+            message: 'Помилка перевірки введених даних'
+          })
+        }
       } catch (error) {
         if (!error.sender) {
           console.log('onSubmit error:', error)

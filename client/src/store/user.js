@@ -18,7 +18,19 @@ export default {
           },
           { root: true }
         )
-        console.log('result: ', result)
+        const accessToken = {
+          token: result.accessToken,
+          userId: JSON.parse(atob(result.accessToken.split('.')[1])).userId,
+          expiresIn: new Date(
+            JSON.parse(atob(result.accessToken.split('.')[1])).exp * 1000
+          )
+        }
+        const refreshToken = {
+          token: result.refreshToken,
+          expiresIn: new Date(result.expiresIn)
+        }
+        commit('auth/setAccessToken', accessToken, { root: true })
+        commit('auth/setRefreshToken', refreshToken, { root: true })
       } catch (error) {
         if (!error.sender) {
           error.sender = 'client'

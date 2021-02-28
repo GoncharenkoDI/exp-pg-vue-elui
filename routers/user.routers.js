@@ -34,6 +34,7 @@ router.post('/register', async (req, res) => {
     let message
     let registerError
     let refreshToken
+    let expiresIn
     let userId
     const client = await db.getClient()
     try {
@@ -88,7 +89,7 @@ router.post('/register', async (req, res) => {
           ip,
           expires_in: new Date(Date.now() + 8 * 3600000)
         },
-        'refresh_token'
+        'refresh_token, expires_in'
       )
       if (result.rows.length === 0) {
         message = 'Не вдалось створити користувача.'
@@ -99,6 +100,7 @@ router.post('/register', async (req, res) => {
         throw registerError
       }
       refreshToken = result.rows[0].refresh_token
+      expiresIn = result.rows[0].expires_in
       await db.commitTransaction(client)
     } catch (error) {
       await db.rollbackTransaction(client)
@@ -111,7 +113,9 @@ router.post('/register', async (req, res) => {
       expiresIn: jwtOptions.expiresIn
     })
 
-    res.status(201).send(JSON.stringify({ accessToken, refreshToken }))
+    res
+      .status(201)
+      .send(JSON.stringify({ accessToken, refreshToken, expiresIn }))
   } catch (error) {
     if (!error.sender) {
       console.log('POST /api/user/register error: ', error)
