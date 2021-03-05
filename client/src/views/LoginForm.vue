@@ -1,5 +1,5 @@
 <template>
-  <div id="login-form">
+  <div id="login-form-div">
     <el-row>
       <el-col :span="12" :offset="6">
         <el-card>
@@ -14,19 +14,23 @@
             </el-button>
           </div>
           <el-form
-            ref="form"
+            ref="login-form"
+            status-icon
             :model="form"
-            label-width="120px"
+            label-width="10rem"
             @submit.native.prevent="onSubmit"
+            :rules="rules"
           >
-            <el-form-item label="Email">
+            <el-form-item label="Email" prop="email">
               <el-input
                 v-model="form.email"
                 clearable
                 prefix-icon="el-icon-message"
+                autocomplete="on"
+                name="email"
               ></el-input>
             </el-form-item>
-            <el-form-item label="Пароль">
+            <el-form-item label="Пароль" prop="password">
               <el-input
                 v-model="form.password"
                 show-password
@@ -51,18 +55,43 @@
 <script>
 export default {
   name: 'LoginForm',
-  data: () => ({
-    form: {
-      name: '',
-      email: '',
-      password: ''
+  data() {
+    return {
+      form: {
+        email: '',
+        password: ''
+      },
+      rules: {
+        email: [
+          {
+            required: true,
+            message: 'Введіть особисту email адресу.',
+            trigger: 'blur'
+          },
+          {
+            type: 'email',
+            message: 'Введіть коректну email адресу',
+            trigger: 'blur'
+          }
+        ],
+        password: [
+          { required: true, message: 'Введіть пароль.', trigger: 'blur' }
+        ]
+      }
     }
-  }),
+  },
   methods: {
-    onSubmit() {
+    async onSubmit() {
       let message = ''
+      let isValidate
       try {
-        this.$store.dispatch('auth/login', {
+        try {
+          await this.$refs['login-form'].validate()
+          isValidate = true
+        } catch (error) {
+          isValidate = false
+        }
+        await this.$store.dispatch('auth/login', {
           email: this.form.email,
           password: this.form.password
         })

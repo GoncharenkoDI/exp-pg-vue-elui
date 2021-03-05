@@ -26,7 +26,7 @@ export default {
             body = data
           }
         }
-
+        dispatch('beforeRequest')
         const response = await fetch(url, { method, body, headers })
         const result = await response.json()
         if (!response.ok) {
@@ -51,6 +51,35 @@ export default {
         }
         commit('setLoading', false)
         throw error
+      }
+    },
+    async beforeRequest({ dispatch, commit, state, rootState }) {
+      const headers = {}
+      try {
+        /* якщо rootState.auth.accessToken 
+        і rootState.auth.accessToken.token 
+        і rootState.auth.accessToken.expiresIn > new Date(Date.now()  + 5 * 60 * 1000) за 5 хвилин ще не закінчиться
+        то додаємо до авторизації rootState.auth.accessToken.token
+        інакше
+          очищуемо rootState.auth.accessToken
+          якщо є діючий refreshToken 
+            запитуємо нову пару tokens
+            записуємо в state
+            додаємо до авторизації rootState.auth.accessToken.token
+          інакше
+            очищуемо rootState.auth.refreshToken
+         */
+        if (
+          rootState.auth.accessToken &&
+          rootState.auth.accessToken.token &&
+          rootState.auth.accessToken.expiresIn >
+            new Date(Date.now() + 5 * 60 * 1000)
+        ) {
+          headers.Authorization = 'Bearer ' + rootState.auth.accessToken.token
+          console.log(headers)
+        }
+      } catch (error) {
+        console.log(error)
       }
     }
   },

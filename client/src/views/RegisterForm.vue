@@ -29,6 +29,8 @@
                 v-model="form.name"
                 clearable
                 prefix-icon="el-icon-user"
+                autocomplete="on"
+                name="name"
               ></el-input>
             </el-form-item>
             <el-form-item label="Email" prop="email">
@@ -36,6 +38,8 @@
                 v-model="form.email"
                 clearable
                 prefix-icon="el-icon-message"
+                autocomplite="on"
+                name="email"
               ></el-input>
             </el-form-item>
             <el-form-item label="Пароль" prop="password">

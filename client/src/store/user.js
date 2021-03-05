@@ -3,10 +3,20 @@ export default {
   state: {
     currentUser: null
   },
-  mutations: {},
+  mutations: {
+    setCurrentUser(state) {
+      const accessToken = state.auth.accessToken
+      if (accessToken && accessToken.token) {
+      }
+    },
+    clearCurrentUser(state) {
+      state.currentUser = null
+    }
+  },
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
+        commit('setCurrentUser')
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
