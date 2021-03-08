@@ -38,7 +38,7 @@
                 v-model="form.email"
                 clearable
                 prefix-icon="el-icon-message"
-                autocomplite="on"
+                autocomplete="on"
                 name="email"
               ></el-input>
             </el-form-item>

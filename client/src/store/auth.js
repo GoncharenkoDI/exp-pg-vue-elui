@@ -55,7 +55,10 @@ export default {
         commit('auth/setAccessToken', accessToken, { root: true })
         commit('auth/setRefreshToken', refreshToken, { root: true })
       } catch (error) {
-        console.log('login error', error)
+        console.log('login error:', error)
+        error.sender = error.sender || 'client'
+        error.source = error.source || 'http request'
+        commit('setLoading', false)
         throw error
       }
     },
@@ -64,6 +67,13 @@ export default {
         console.log('refresh token')
       } catch (error) {
         console.log(error)
+      }
+    },
+    async getCurrentUser() {
+      try {
+        console.log('getCurrentUser')
+      } catch (error) {
+        console.log('getCurrentUser error', error)
       }
     }
   }

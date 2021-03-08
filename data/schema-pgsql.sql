@@ -25,6 +25,7 @@ CREATE TABLE public.users
     id uuid NOT NULL DEFAULT gen_random_uuid(),
     email character varying(255) COLLATE pg_catalog."default" NOT NULL,
     password character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    user_name character varying(255) COLLATE pg_catalog."default" NOT NULL,
     last_login date,
     login_state character varying(255) COLLATE pg_catalog."default",
     session_id character varying(1024) COLLATE pg_catalog."default",

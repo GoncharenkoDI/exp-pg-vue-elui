@@ -10,7 +10,7 @@ export default {
   },
   actions: {
     async request(
-      { dispatch, commit },
+      { dispatch, commit, rootState },
       { url, method = 'GET', data = {}, headers = {} }
     ) {
       commit('setLoading', true)
@@ -27,6 +27,9 @@ export default {
           }
         }
         dispatch('beforeRequest')
+        if (rootState.auth.accessToken && rootState.auth.accessToken.token) {
+          headers.Authorization = 'Bearer ' + rootState.auth.accessToken.token
+        }
         const response = await fetch(url, { method, body, headers })
         const result = await response.json()
         if (!response.ok) {
@@ -54,29 +57,28 @@ export default {
       }
     },
     async beforeRequest({ dispatch, commit, state, rootState }) {
-      const headers = {}
       try {
-        /* якщо rootState.auth.accessToken 
-        і rootState.auth.accessToken.token 
-        і rootState.auth.accessToken.expiresIn > new Date(Date.now()  + 5 * 60 * 1000) за 5 хвилин ще не закінчиться
-        то додаємо до авторизації rootState.auth.accessToken.token
-        інакше
-          очищуемо rootState.auth.accessToken
-          якщо є діючий refreshToken 
-            запитуємо нову пару tokens
-            записуємо в state
-            додаємо до авторизації rootState.auth.accessToken.token
-          інакше
-            очищуемо rootState.auth.refreshToken
-         */
-        if (
-          rootState.auth.accessToken &&
-          rootState.auth.accessToken.token &&
-          rootState.auth.accessToken.expiresIn >
-            new Date(Date.now() + 5 * 60 * 1000)
-        ) {
-          headers.Authorization = 'Bearer ' + rootState.auth.accessToken.token
-          console.log(headers)
+        if (rootState.auth.refreshToken && rootState.auth.refreshToken.token) {
+          if (rootState.auth.refreshToken.expiresIn < new Date(Date.now())) {
+            if (
+              !rootState.auth.accessToken ||
+              !rootState.auth.accessToken.token ||
+              rootState.auth.accessToken.expiresIn >
+                new Date(Date.now() + 5 * 60 * 1000)
+            ) {
+              await dispatch(
+                'auth/fetchRefreshToken',
+                rootState.auth.refreshToken.token,
+                { root: true }
+              )
+            }
+          } else {
+            commit('auth/clearRefreshToken', null, { root: true })
+            commit('auth/clearAccessToken', null, { root: true })
+          }
+        } else {
+          commit('auth/clearRefreshToken', null, { root: true })
+          commit('auth/clearAccessToken', null, { root: true })
         }
       } catch (error) {
         console.log(error)

@@ -7,6 +7,7 @@ export default {
     setCurrentUser(state) {
       const accessToken = state.auth.accessToken
       if (accessToken && accessToken.token) {
+        console.log('accessToken')
       }
     },
     clearCurrentUser(state) {
@@ -16,7 +17,7 @@ export default {
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
-        commit('setCurrentUser')
+        //commit('setCurrentUser')
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -35,11 +36,16 @@ export default {
             JSON.parse(atob(result.accessToken.split('.')[1])).exp * 1000
           )
         }
+
         const refreshToken = {
           token: result.refreshToken,
           expiresIn: new Date(result.expiresIn)
         }
-        commit('auth/setAccessToken', accessToken, { root: true })
+        commit(
+          'auth/setAccessToken',
+          { token: accessToken.token, expiresIn: accessToken.expiresIn },
+          { root: true }
+        )
         commit('auth/setRefreshToken', refreshToken, { root: true })
       } catch (error) {
         if (!error.sender) {

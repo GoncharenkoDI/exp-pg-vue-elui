@@ -3,6 +3,9 @@
  */
 const config = require('config')
 const User = require('../models/User')
+const jwt = require('jsonwebtoken')
+const config = require('config')
+
 module.exports = async (req, res, next) => {
   if (req.method === 'OPTIONS') {
     next()
@@ -10,10 +13,14 @@ module.exports = async (req, res, next) => {
   try {
     const authorization = req.headers.authorization
     if (authorization) {
-      const uuid = authorization.split(' ')[1] //Bearer uuid
-      const user = await User.getUser(uuid)
+      const authToken = authorization.split(' ')[1] //Bearer authToken
+      const jwtOptions = config.get('jwt')
+      const tokenInfo = jwt.verify(authToken, jwtOptions.secret)
+      const userId = tokenInfo.userId
+
+      const user = await User.getUser(userId)
       if (Object.keys(user).length != 0) {
-        req.currentUser = uuid
+        req.currentUserId = userId
       }
     }
     next()
