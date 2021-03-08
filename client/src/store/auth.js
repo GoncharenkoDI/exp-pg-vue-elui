@@ -69,9 +69,17 @@ export default {
         console.log(error)
       }
     },
-    async getCurrentUser() {
+    async getCurrentUser({ dispatch, commit }) {
       try {
-        console.log('getCurrentUser')
+        const result = await dispatch(
+          'http/request',
+          {
+            url: '/api/auth/user',
+            method: 'get'
+          },
+          { root: true }
+        )
+        console.log('getCurrentUser', result)
       } catch (error) {
         console.log('getCurrentUser error', error)
       }
