@@ -57,16 +57,34 @@ export default {
       } catch (error) {
         console.log('login error:', error)
         error.sender = error.sender || 'client'
-        error.source = error.source || 'http request'
+        error.source = error.source || 'auth login'
         commit('setLoading', false)
         throw error
       }
     },
-    async refreshToken({ dispatch, commit }, token) {
+    async refreshToken({ dispatch, commit, state }) {
+      const token = state.refreshToken.token
       try {
-        console.log('refresh token')
+        commit('clearAccessToken')
+        commit('clearRefreshToken')
+        const fp = await (await this._vm.$fingerprint).get()
+        const result = await dispatch(
+          'http/request',
+          {
+            url: '/api/auth/token',
+            method: 'put',
+            data: { token, fingerprint: fp.visitorId },
+            headers: { 'Content-Type': 'application/json' }
+          },
+          { root: true }
+        )
+        console.log('refreshToken', result)
       } catch (error) {
-        console.log(error)
+        console.log('refreshToken error:', error)
+        error.sender = error.sender || 'client'
+        error.source = error.source || 'auth refreshToken'
+        commit('setLoading', false)
+        throw error
       }
     },
     async getCurrentUser({ dispatch, commit }) {
@@ -79,7 +97,7 @@ export default {
           },
           { root: true }
         )
-        console.log('getCurrentUser', result)
+        console.log('getCurrentUser result', result)
       } catch (error) {
         console.log('getCurrentUser error', error)
       }

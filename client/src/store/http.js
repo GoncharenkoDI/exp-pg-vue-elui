@@ -26,7 +26,7 @@ export default {
             body = data
           }
         }
-        dispatch('beforeRequest')
+        await dispatch('beforeRequest')
         if (rootState.auth.accessToken && rootState.auth.accessToken.token) {
           headers.Authorization = 'Bearer ' + rootState.auth.accessToken.token
         }
@@ -59,11 +59,11 @@ export default {
     async beforeRequest({ dispatch, commit, state, rootState }) {
       try {
         if (rootState.auth.refreshToken && rootState.auth.refreshToken.token) {
-          if (rootState.auth.refreshToken.expiresIn < new Date(Date.now())) {
+          if (rootState.auth.refreshToken.expiresIn > new Date(Date.now())) {
             if (
               !rootState.auth.accessToken ||
               !rootState.auth.accessToken.token ||
-              rootState.auth.accessToken.expiresIn >
+              rootState.auth.accessToken.expiresIn <
                 new Date(Date.now() + 5 * 60 * 1000)
             ) {
               await dispatch(
@@ -80,9 +80,11 @@ export default {
           commit('auth/clearRefreshToken', null, { root: true })
           commit('auth/clearAccessToken', null, { root: true })
         }
+        return
       } catch (error) {
         console.log(error)
       }
+      console.log('end beforeRequest')
     }
   },
   modules: {}

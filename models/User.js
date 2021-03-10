@@ -36,6 +36,7 @@ const User = {
    * @param {string} email
    */
   async getUserByEmail(email) {},
+
   /** реєстрація нового користувача
    * @method addUser
    * @param candidate {email, password, name}

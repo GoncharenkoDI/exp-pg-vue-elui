@@ -44,12 +44,13 @@ router.post('/register', async (req, res) => {
     if (!error.sender) {
       console.log('POST /api/user/register error: ', error)
     }
-    const resObj = {
-      message: error.message || 'Невідома помилка',
-      sender: error.sender || 'server',
-      source: error.source || 'POST /api/user/register'
-    }
-    res.status(500).send(JSON.stringify(resObj))
+    res.status(500).send(
+      JSON.stringify({
+        message: error.message || 'Невідома помилка',
+        sender: error.sender || 'server',
+        source: error.source || 'POST /api/user/register'
+      })
+    )
   }
 })
 

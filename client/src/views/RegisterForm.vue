@@ -171,6 +171,8 @@ export default {
             password: this.form.password,
             name: this.form.name
           })
+          console.log('this.$store.state', this.$store.state)
+          await this.$store.dispatch('auth/getCurrentUser')
           this.$message({
             showClose: true,
             type: 'success',

@@ -1,7 +1,6 @@
 /** процедура дійсності користувача в системі
  * @module authentication.middleware.js процедура дійсності користувача в системі
  */
-const config = require('config')
 const User = require('../models/User')
 const jwt = require('jsonwebtoken')
 const config = require('config')
@@ -12,6 +11,7 @@ module.exports = async (req, res, next) => {
   }
   try {
     const authorization = req.headers.authorization
+    console.log('authorization', authorization)
     if (authorization) {
       const authToken = authorization.split(' ')[1] //Bearer authToken
       const jwtOptions = config.get('jwt')

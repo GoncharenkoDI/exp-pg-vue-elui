@@ -17,7 +17,6 @@ export default {
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
-        //commit('setCurrentUser')
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -47,6 +46,7 @@ export default {
           { root: true }
         )
         commit('auth/setRefreshToken', refreshToken, { root: true })
+        return
       } catch (error) {
         if (!error.sender) {
           error.sender = 'client'

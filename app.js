@@ -1,10 +1,12 @@
 const express = require('express')
 const config = require('config')
 const mountRoutes = require('./routers')
+const authenticationMiddleware = require('./middleware/authentication.middleware')
 
 const app = express()
 
 app.use(express.json())
+app.use(authenticationMiddleware)
 mountRoutes(app)
 
 app.use(function (req, res) {
