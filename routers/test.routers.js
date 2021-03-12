@@ -14,9 +14,12 @@ const router = express.Router()
  */
 router.get('/', async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM test_table', [])
+    const sessionsId = [1, 2]
+    const { rows } = await db.query(
+      `SELECT * FROM test_table WHERE id in (${sessionsId.join()})`
+    )
 
-    res.send(JSON.stringify(rows[0]))
+    res.send(JSON.stringify(rows))
   } catch (error) {
     console.log(error)
     res.status(500).send(JSON.stringify(error))

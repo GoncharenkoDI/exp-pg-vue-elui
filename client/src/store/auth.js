@@ -2,7 +2,8 @@ export default {
   namespaced: true,
   state: {
     accessToken: null, //{token = c093e09f-c100-470f-b24d-0ba96ce1a14f, userId, expiresIn}
-    refreshToken: null //{token, expiresIn}
+    refreshToken: null, //{token, expiresIn}
+    currentUser: null
   },
   mutations: {
     setAccessToken(state, accessToken) {
@@ -23,6 +24,12 @@ export default {
     clearRefreshToken(state) {
       state.refreshToken = null
       localStorage.removeItem('refreshToken')
+    },
+    setCurrentUser(state, user) {
+      state.currentUser = user
+    },
+    clearCurrentUser(state) {
+      state.currentUser = null
     }
   },
   actions: {
@@ -87,9 +94,13 @@ export default {
         throw error
       }
     },
+    /**
+     *
+     * @param {*} param0
+     */
     async getCurrentUser({ dispatch, commit }) {
       try {
-        const result = await dispatch(
+        const user = await dispatch(
           'http/request',
           {
             url: '/api/auth/user',
@@ -97,7 +108,11 @@ export default {
           },
           { root: true }
         )
-        console.log('getCurrentUser result', result)
+        if (Object.keys(user).length) {
+          commit('setCurrentUser', user)
+        } else {
+          commit('clearCurrentUser')
+        }
       } catch (error) {
         console.log('getCurrentUser error', error)
       }

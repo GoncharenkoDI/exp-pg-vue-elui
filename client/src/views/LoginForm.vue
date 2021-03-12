@@ -95,6 +95,7 @@ export default {
           email: this.form.email,
           password: this.form.password
         })
+        await this.$store.dispatch('auth/getCurrentUser')
         this.$message({
           showClose: true,
           type: 'success',

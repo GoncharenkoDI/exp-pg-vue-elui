@@ -4,12 +4,10 @@ const bcrypt = require('bcrypt')
 
 const User = {
   async getUsers() {},
-  /**
-   *
+
+  /** отримання інформації про користувача за його id
    * @param { uuid } userId
    * @returns { userId, email, user_name, last_login, login_state, session_id, token, create_at, update_at }
-   *
-   *
    */
   async getUser(userId) {
     try {
@@ -31,11 +29,59 @@ const User = {
       throw error
     }
   },
+
+  /** перевірка наявності користувача за email
+   * @param {string} email
+   * @returns {bool}
+   */
+  async checkUserByEmail(email) {
+    try {
+      const { rows } = await db.query('SELECT id FROM users WHERE email = $1', [
+        email
+      ])
+      return rows.length !== 0
+    } catch (error) {
+      if (!error.sender) {
+        console.log('checkUserByEmail error: ', error)
+      }
+      error.sender = error.sender || 'server'
+      error.source = error.source || 'User checkUserByEmail error'
+      throw error
+    }
+  },
   /**
    *
    * @param {string} email
+   * @param {string} password
+   * @returns {uuid} userId||null
    */
-  async getUserByEmail(email) {},
+  async testUser(email, password) {
+    try {
+      const {
+        rows
+      } = await db.query('SELECT id, password FROM users WHERE email = $1', [
+        email
+      ])
+      if (rows.length === 0) {
+        return null
+      }
+      const userId = rows[0].id
+      const hashPassword = rows[0].password
+      const match = await bcrypt.compare(password, hashPassword)
+      if (match) {
+        return userId
+      } else {
+        return null
+      }
+    } catch (error) {
+      if (!error.sender) {
+        console.log('testUser error: ', error)
+      }
+      error.sender = error.sender || 'server'
+      error.source = error.source || 'User testUser error'
+      throw error
+    }
+  },
 
   /** реєстрація нового користувача
    * @method addUser
@@ -93,6 +139,7 @@ const User = {
         'DELETE FROM public.refreshsessions WHERE expires_in < CURRENT_TIMESTAMP'
       )
       // створити нову сесію в таблиці refreshsessions expires_in - 8 годин
+      const duration = +config.get('session').duration || 8
       // {user_id,  user_agent: ua, fingerprint, ip,  expires_in: new Date(Date.now() + 8*3600000)} отримати refresh_token
       result = await db.clientInsert(
         client,
@@ -102,7 +149,7 @@ const User = {
           user_agent: ua,
           fingerprint,
           ip,
-          expires_in: new Date(Date.now() + 8 * 3600000)
+          expires_in: new Date(Date.now() + duration * 3600000)
         },
         'refresh_token, expires_in'
       )
@@ -119,7 +166,9 @@ const User = {
       await db.commitTransaction(client)
       return { userId, refreshToken, expiresIn }
     } catch (error) {
-      console.log(error)
+      if (!error.sender) {
+        console.log('User addUse error: ', error)
+      }
       error.sender = error.sender || 'server'
       error.source = error.source || 'User addUser error'
       await db.rollbackTransaction(client)

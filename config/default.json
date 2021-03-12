@@ -12,5 +12,9 @@
   },
   "bcrypt": {
     "saltRounds": 10
+  },
+  "session": {
+    "duration": 8,
+    "maxSessions": 5
   }
 }

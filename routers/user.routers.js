@@ -69,7 +69,7 @@ router.get('/', async (req, res) => {
 })
 
 /** інформація про користувача за id
- *@method GET
+ * @method GET
  * @uri /api/user/id
  * @returns { userId, email, user_name, last_login, login_state, session_id, token, create_at, update_at } user
  */
@@ -136,10 +136,7 @@ router.delete('/:id', async (req, res) => {
 router.get('/test-email/:email', async (req, res) => {
   try {
     const { email } = req.params
-    const { rows } = await db.query('SELECT * FROM users WHERE email = $1', [
-      email
-    ])
-    const result = rows.length !== 0
+    const result = await User.checkUserByEmail(email)
     res.send(JSON.stringify(result))
   } catch (error) {
     console.log(error)

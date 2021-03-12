@@ -1,19 +1,7 @@
 export default {
   namespaced: true,
-  state: {
-    currentUser: null
-  },
-  mutations: {
-    setCurrentUser(state) {
-      const accessToken = state.auth.accessToken
-      if (accessToken && accessToken.token) {
-        console.log('accessToken')
-      }
-    },
-    clearCurrentUser(state) {
-      state.currentUser = null
-    }
-  },
+  state: {},
+  mutations: {},
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
