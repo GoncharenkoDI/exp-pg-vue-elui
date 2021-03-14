@@ -48,9 +48,9 @@ module.exports = {
     try {
       let text
       if (where) {
-        text = `DELETE FORM ${table} WHERE ${where}`
+        text = `DELETE FROM ${table} WHERE ${where}`
       } else {
-        text = `DELETE FORM ${table}`
+        text = `DELETE FROM ${table}`
       }
 
       const result = await pool.query(text, params)
@@ -123,9 +123,9 @@ module.exports = {
     try {
       let text
       if (where) {
-        text = `DELETE FORM ${table} WHERE ${where}`
+        text = `DELETE FROM ${table} WHERE ${where}`
       } else {
-        text = `DELETE FORM ${table}`
+        text = `DELETE FROM ${table}`
       }
 
       const result = await client.query(text, params)

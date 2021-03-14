@@ -151,7 +151,11 @@ export default {
     async isUnique(email) {
       if (email === '') return true
       const response = Boolean(
-        await this.$store.dispatch('user/testUserByEmail', { email })
+        await this.$store.dispatch(
+          'user/testUserByEmail',
+          { email },
+          { root: true }
+        )
       )
       return !response
     },
@@ -166,12 +170,18 @@ export default {
           isValidate = false
         }
         if (isValidate) {
-          await this.$store.dispatch('user/register', {
-            email: this.form.email,
-            password: this.form.password,
-            name: this.form.name
+          await this.$store.dispatch(
+            'user/register',
+            {
+              email: this.form.email,
+              password: this.form.password,
+              name: this.form.name
+            },
+            { root: true }
+          )
+          await this.$store.dispatch('auth/getCurrentUser', null, {
+            root: true
           })
-          await this.$store.dispatch('auth/getCurrentUser')
           this.$message({
             showClose: true,
             type: 'success',

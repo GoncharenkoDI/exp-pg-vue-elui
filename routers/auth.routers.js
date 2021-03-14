@@ -1,8 +1,9 @@
 const express = require('express')
 const db = require('../db')
+const config = require('config')
 const User = require('../models/User')
-const Sessions = require('../models/Session')
 const Session = require('../models/Session')
+const jwt = require('jsonwebtoken')
 
 const router = express.Router()
 
@@ -16,6 +17,7 @@ router.post('/login', async (req, res) => {
   try {
     //отримати з req.body {email, password, }
     const { email, password, fingerprint } = req.body
+    const jwtOptions = config.get('jwt')
     const ip = req.ip
     const ua = req.get('User-Agent')
     // Знайти користувача за email та паролем
@@ -48,24 +50,43 @@ router.post('/login', async (req, res) => {
       .send(JSON.stringify({ accessToken, refreshToken, expiresIn }))
   } catch (error) {
     if (!error.sender) {
-      console.log('POST /api/user/register error: ', error)
+      console.log('POST /api/auth/login error: ', error)
     }
     res.status(500).send(
       JSON.stringify({
         message: error.message || 'Невідома помилка',
         sender: error.sender || 'server',
-        source: error.source || 'POST /api/user/register'
+        source: error.source || 'POST /api/auth/login'
       })
     )
   }
 })
-/**
+/** Оновлення токенів на підставі refresh-token
  * @method PUT
  * @uri /api/auth/token
  * @param { token, fingerprint } req.body
- * @returns { accessToken, refreshToken, expiresIn } || status = 500 { message, sender, source} status = 201
+ * @returns  status = 200 { accessToken, refreshToken, expiresIn } || status = 500 { message, sender, source}
  */
-router.put('/token', async (req, res) => {})
+router.put('/token', async (req, res) => {
+  try {
+    const { token, fingerprint } = req.body
+    const jwtOptions = config.get('jwt')
+    const ip = req.ip
+    const ua = req.get('User-Agent')
+    // перевірити токен (наявність та чи не закінчився)
+  } catch (error) {
+    if (!error.sender) {
+      console.log('PUT /api/user/token error: ', error)
+    }
+    res.status(500).send(
+      JSON.stringify({
+        message: error.message || 'Невідома помилка',
+        sender: error.sender || 'server',
+        source: error.source || 'PUT /api/user/token'
+      })
+    )
+  }
+})
 /**
  * @method GET
  * @uri /api/auth/user
@@ -84,7 +105,7 @@ router.get('/user', async (req, res) => {
     res.send(JSON.stringify(user))
   } catch (error) {
     if (!error.sender) {
-      console.log('POST /api/user/register error: ', error)
+      console.log('GET /api/auth/user error: ', error)
     }
     res.status(500).send(
       JSON.stringify({

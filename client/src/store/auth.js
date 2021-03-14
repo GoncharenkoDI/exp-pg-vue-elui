@@ -35,8 +35,8 @@ export default {
   actions: {
     async login({ dispatch, commit }, { email, password }) {
       try {
-        commit('clearAccessToken')
-        commit('clearRefreshToken')
+        commit('auth/clearAccessToken', null, { root: true })
+        commit('auth/clearRefreshToken', null, { root: true })
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -62,18 +62,20 @@ export default {
         commit('auth/setAccessToken', accessToken, { root: true })
         commit('auth/setRefreshToken', refreshToken, { root: true })
       } catch (error) {
-        console.log('login error:', error)
+        if (!error.sender) {
+          error.sender = 'client'
+          console.log('auth login error:', error)
+        }
         error.sender = error.sender || 'client'
         error.source = error.source || 'auth login'
-        commit('setLoading', false)
         throw error
       }
     },
     async refreshToken({ dispatch, commit, state }) {
       const token = state.refreshToken.token
       try {
-        commit('clearAccessToken')
-        commit('clearRefreshToken')
+        commit('auth/clearAccessToken', null, { root: true })
+        commit('auth/clearRefreshToken', null, { root: true })
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -90,7 +92,6 @@ export default {
         console.log('refreshToken error:', error)
         error.sender = error.sender || 'client'
         error.source = error.source || 'auth refreshToken'
-        commit('setLoading', false)
         throw error
       }
     },
@@ -109,9 +110,9 @@ export default {
           { root: true }
         )
         if (Object.keys(user).length) {
-          commit('setCurrentUser', user)
+          commit('auth/setCurrentUser', user, { root: true })
         } else {
-          commit('clearCurrentUser')
+          commit('auth/clearCurrentUser', null, { root: true })
         }
       } catch (error) {
         console.log('getCurrentUser error', error)

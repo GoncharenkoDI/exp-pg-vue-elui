@@ -13,7 +13,7 @@ export default {
       { dispatch, commit, rootState },
       { url, method = 'GET', data = {}, headers = {} }
     ) {
-      commit('setLoading', true)
+      commit('http/setLoading', true, { root: true })
       try {
         let body
         if (Object.keys(data).length) {
@@ -26,7 +26,8 @@ export default {
             body = data
           }
         }
-        await dispatch('beforeRequest')
+
+        await dispatch('http/beforeRequest', null, { root: true })
         if (rootState.auth.accessToken && rootState.auth.accessToken.token) {
           headers.Authorization = 'Bearer ' + rootState.auth.accessToken.token
         }
@@ -42,7 +43,7 @@ export default {
           }
           throw errorObj
         }
-        commit('setLoading', false)
+        commit('http/setLoading', false, { root: true })
         return result
       } catch (error) {
         console.log('request error:', error)
@@ -52,7 +53,7 @@ export default {
         if (!error.source) {
           error.source = 'http request'
         }
-        commit('setLoading', false)
+        commit('http/setLoading', false, { root: true })
         throw error
       }
     },

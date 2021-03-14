@@ -11,7 +11,6 @@ module.exports = async (req, res, next) => {
   }
   try {
     const authorization = req.headers.authorization
-    console.log('authorization', authorization)
     if (authorization) {
       const authToken = authorization.split(' ')[1] //Bearer authToken
       const jwtOptions = config.get('jwt')

@@ -91,17 +91,24 @@ export default {
         } catch (error) {
           isValidate = false
         }
-        await this.$store.dispatch('auth/login', {
-          email: this.form.email,
-          password: this.form.password
-        })
-        await this.$store.dispatch('auth/getCurrentUser')
+        await this.$store.dispatch(
+          'auth/login',
+          {
+            email: this.form.email,
+            password: this.form.password
+          },
+          { root: true }
+        )
+        await this.$store.dispatch('auth/getCurrentUser', null, { root: true })
         this.$message({
           showClose: true,
           type: 'success',
           dangerouslyUseHTMLString: true,
           message: 'Ви успішно ввійшли в систему'
         })
+        this.form.email = ''
+        this.form.password = ''
+        this.$router.push('/')
       } catch (error) {
         console.log('onSubmit error:', error)
         if (error.type) {
