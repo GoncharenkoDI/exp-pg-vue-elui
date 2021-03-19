@@ -30,12 +30,13 @@ module.exports = {
       throw error
     }
   },
-  update: async (table, fields, where, params) => {
+  update: async (table, fields, where, params, returning = '') => {
     try {
       const fieldsSet = Object.keys(fields)
         .map((field, index) => `${field} = $${index + 1}`)
         .join()
-      const text = `UPDATE ${table} SET ${fieldsSet} WHERE ${where}`
+      const retStr = returning ? ` RETURNING ${returning}` : ''
+      const text = `UPDATE ${table} SET ${fieldsSet} WHERE ${where} ${retStr}`
       return await pool.query(text, [...Object.values(fields), ...params])
     } catch (error) {
       console.log('update error: ', error)
@@ -105,12 +106,20 @@ module.exports = {
       throw error
     }
   },
-  clientUpdate: async (client, table, fields, where, params = []) => {
+  clientUpdate: async (
+    client,
+    table,
+    fields,
+    where,
+    params = [],
+    returning = ''
+  ) => {
     try {
       const fieldsSet = Object.keys(fields)
         .map((field, index) => `${field} = $${index + 1}`)
         .join()
-      const text = `UPDATE ${table} SET ${fieldsSet} WHERE ${where}`
+      const retStr = returning ? ` RETURNING ${returning}` : ''
+      const text = `UPDATE ${table} SET ${fieldsSet} WHERE ${where} ${retStr}`
       return await client.query(text, [...Object.values(fields), ...params])
     } catch (error) {
       console.log('update error: ', error)

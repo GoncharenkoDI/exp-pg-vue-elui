@@ -35,11 +35,11 @@ export default {
         const result = await response.json()
         if (!response.ok) {
           const errorObj = new Error(result.message)
-          errorObj.sender = 'api server'
+          errorObj.sender = 'api server (request)'
           if (result.source) {
             errorObj.source = result.source
           } else {
-            errorObj.source = `http error: ${response.statusText}`
+            errorObj.source = `http error (request): ${response.statusText}`
           }
           throw errorObj
         }
@@ -67,25 +67,64 @@ export default {
               rootState.auth.accessToken.expiresIn <
                 new Date(Date.now() + 5 * 60 * 1000)
             ) {
-              await dispatch(
-                'auth/fetchRefreshToken',
-                rootState.auth.refreshToken.token,
-                { root: true }
-              )
+              commit('auth/clearAccessToken', null, { root: true })
+              const headers = {
+                'Content-Type': 'application/json'
+              }
+              const fp = await (await this._vm.$fingerprint).get()
+              const body = JSON.stringify({
+                token: rootState.auth.refreshToken.token,
+                fingerprint: fp.visitorId
+              })
+              commit('auth/clearRefreshToken', null, { root: true })
+              const response = await fetch('/api/auth/token', {
+                method: 'PUT',
+                body,
+                headers
+              })
+              //status = 200 { accessToken, refreshToken, expiresIn, user }
+              const result = await response.json()
+              if (!response.ok) {
+                const errorObj = new Error(result.message)
+                errorObj.sender = result.sender || 'api server (beforeRequest)'
+                errorObj.source =
+                  result.source ||
+                  `http error (beforeRequest): ${response.statusText}`
+                throw errorObj
+              }
+              const accessToken = {
+                token: result.accessToken,
+                userId: JSON.parse(atob(result.accessToken.split('.')[1]))
+                  .userId,
+                expiresIn: new Date(
+                  JSON.parse(atob(result.accessToken.split('.')[1])).exp * 1000
+                )
+              }
+              const refreshToken = {
+                token: result.refreshToken,
+                expiresIn: new Date(result.expiresIn)
+              }
+              commit('auth/setAccessToken', accessToken, { root: true })
+              commit('auth/setRefreshToken', refreshToken, { root: true })
+              commit('auth/setCurrentUser', result.user, { root: true })
             }
           } else {
             commit('auth/clearRefreshToken', null, { root: true })
             commit('auth/clearAccessToken', null, { root: true })
+            commit('auth/clearCurrentUser', null, { root: true })
           }
         } else {
           commit('auth/clearRefreshToken', null, { root: true })
           commit('auth/clearAccessToken', null, { root: true })
+          commit('auth/clearCurrentUser', null, { root: true })
         }
         return
       } catch (error) {
+        commit('auth/clearRefreshToken', null, { root: true })
+        commit('auth/clearAccessToken', null, { root: true })
+        commit('auth/clearCurrentUser', null, { root: true })
         console.log(error)
       }
-      console.log('end beforeRequest')
     }
   },
   modules: {}

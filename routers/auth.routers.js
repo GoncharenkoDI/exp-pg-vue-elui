@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
  * @method PUT
  * @uri /api/auth/token
  * @param { token, fingerprint } req.body
- * @returns  status = 200 { accessToken, refreshToken, expiresIn } || status = 500 { message, sender, source}
+ * @returns  status = 200 { accessToken, refreshToken, expiresIn, user } || status = 500 { message, sender, source}
  */
 router.put('/token', async (req, res) => {
   try {
@@ -73,7 +73,38 @@ router.put('/token', async (req, res) => {
     const jwtOptions = config.get('jwt')
     const ip = req.ip
     const ua = req.get('User-Agent')
-    // перевірити токен (наявність та чи не закінчився)
+    // видалити протерміновані сесії
+    await Session.deleteOldSessions()
+    // перевірити токен (за токеном, ip, fp), якщо немає 404 статус
+    /**
+     * @constant {id, user_id, refresh_token, user_agent, fingerprint, ip, expires_in, create_at, update_at} session
+     */
+    const session = await Session.getSession({ token, ip, ua, fingerprint })
+    if (Object.keys(session).length === 0) {
+      res.status(404).send(
+        JSON.stringify({
+          message: 'Користувач з вказаними параметрами не знайдений.',
+          sender: error.sender || 'server',
+          source: error.source || 'PUT /api/user/token'
+        })
+      )
+    }
+    // в знайденій сесії згенерувати новий токен та термін дії,
+    const { refreshToken, expiresIn } = await Session.updateSession(session.id)
+    // згенерувати новий access-token за id користувача,
+    const accessToken = jwt.sign(
+      { userId: session.user_id },
+      jwtOptions.secret,
+      {
+        expiresIn: jwtOptions.expiresIn
+      }
+    )
+    // отримати інформацію про користувача
+    const user = await User.getUser(session.user_id)
+    // повернути refresh-token, термін дії, access-token,  інформацію про користувача
+    res
+      .status(200)
+      .send(JSON.stringify({ accessToken, refreshToken, expiresIn, user }))
   } catch (error) {
     if (!error.sender) {
       console.log('PUT /api/user/token error: ', error)
