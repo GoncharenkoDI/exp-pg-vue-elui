@@ -97,7 +97,7 @@ const Session = {
         `UPDATE 
            public.refreshsessions 
          SET 
-           refresh_token = en_random_uuid(),
+           refresh_token = gen_random_uuid(),
            expires_in = $1,
            update_at = null 
          WHERE id = $2 
@@ -156,7 +156,7 @@ const Session = {
   /** видалення застарілих сесій */
   async deleteOldSessions() {
     try {
-      await db.Query(
+      await db.query(
         'DELETE FROM public.refreshsessions WHERE expires_in < CURRENT_TIMESTAMP'
       )
     } catch (error) {

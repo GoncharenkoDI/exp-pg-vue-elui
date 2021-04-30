@@ -75,15 +75,15 @@ router.put('/token', async (req, res) => {
     const ua = req.get('User-Agent')
     // видалити протерміновані сесії
     await Session.deleteOldSessions()
-    // перевірити токен (за токеном, ip, fp), якщо немає 404 статус
     /**
+     * @description перевірити токен (за токеном, ip, fp), якщо немає 404 статус
      * @constant {id, user_id, refresh_token, user_agent, fingerprint, ip, expires_in, create_at, update_at} session
      */
     const session = await Session.getSession({ token, ip, ua, fingerprint })
     if (Object.keys(session).length === 0) {
       res.status(404).send(
         JSON.stringify({
-          message: 'Користувач з вказаними параметрами не знайдений.',
+          message: 'Токен з вказаними параметрами не знайдений.',
           sender: error.sender || 'server',
           source: error.source || 'PUT /api/user/token'
         })

@@ -72,6 +72,11 @@ export default {
       }
     },
     async refreshToken({ dispatch, commit, state }) {
+      console.log('refresh token')
+      if (!state.refreshToken || !state.refreshToken.token) {
+        return
+      }
+
       const token = state.refreshToken.token
       try {
         commit('auth/clearAccessToken', null, { root: true })

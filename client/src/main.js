@@ -16,6 +16,26 @@ Vue.use(Vuelidate)
 
 Vue.use(fingerprintPlugin)
 
+async function updateUser() {
+  if (localStorage.getItem('refreshToken')) {
+    console.log(localStorage.getItem('refreshToken'))
+    store.commit(
+      'auth/setRefreshToken',
+      JSON.parse(localStorage.getItem('refreshToken')),
+      { root: true }
+    )
+  } else {
+    console.log('no refreshToken')
+    return
+  }
+  try {
+    await store.dispatch('auth/refreshToken', null, { root: true })
+  } catch (e) {
+    console.log(e.message)
+  }
+}
+updateUser()
+
 new Vue({
   router,
   store,
