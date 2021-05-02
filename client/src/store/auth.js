@@ -5,6 +5,11 @@ export default {
     refreshToken: null, //{token, expiresIn}
     currentUser: null
   },
+  getters: {
+    hasAccessToken(state) {
+      return !(state.accessToken === null)
+    }
+  },
   mutations: {
     setAccessToken(state, accessToken) {
       state.accessToken = accessToken
@@ -37,6 +42,7 @@ export default {
       try {
         commit('auth/clearAccessToken', null, { root: true })
         commit('auth/clearRefreshToken', null, { root: true })
+        commit('auth/clearCurrentUser', null, { root: true })
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -56,11 +62,13 @@ export default {
           )
         }
         const refreshToken = {
-          token: result.refreshToken,
-          expiresIn: new Date(result.expiresIn)
+          token: result.refreshToken.token,
+          expiresIn: new Date(result.refreshToken.expiresIn)
         }
+        const user = result.user
         commit('auth/setAccessToken', accessToken, { root: true })
         commit('auth/setRefreshToken', refreshToken, { root: true })
+        commit('auth/setCurrentUser', user, { root: true })
       } catch (error) {
         if (!error.sender) {
           error.sender = 'client'
@@ -71,8 +79,8 @@ export default {
         throw error
       }
     },
+
     async refreshToken({ dispatch, commit, state }) {
-      console.log('refresh token')
       if (!state.refreshToken || !state.refreshToken.token) {
         return
       }
@@ -81,6 +89,7 @@ export default {
       try {
         commit('auth/clearAccessToken', null, { root: true })
         commit('auth/clearRefreshToken', null, { root: true })
+        commit('auth/clearCurrentUser', null, { root: true })
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -92,7 +101,21 @@ export default {
           },
           { root: true }
         )
-        console.log('refreshToken', result)
+        const accessToken = {
+          token: result.accessToken,
+          userId: JSON.parse(atob(result.accessToken.split('.')[1])).userId,
+          expiresIn: new Date(
+            JSON.parse(atob(result.accessToken.split('.')[1])).exp * 1000
+          )
+        }
+        const refreshToken = {
+          token: result.refreshToken.token,
+          expiresIn: new Date(result.refreshToken.expiresIn)
+        }
+        const user = result.user
+        commit('auth/setAccessToken', accessToken, { root: true })
+        commit('auth/setRefreshToken', refreshToken, { root: true })
+        commit('auth/setCurrentUser', user, { root: true })
       } catch (error) {
         console.log('refreshToken error:', error)
         error.sender = error.sender || 'client'

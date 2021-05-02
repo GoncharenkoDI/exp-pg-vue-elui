@@ -99,7 +99,7 @@ const Session = {
          SET 
            refresh_token = gen_random_uuid(),
            expires_in = $1,
-           update_at = null 
+           update_at = CURRENT_TIMESTAMP 
          WHERE id = $2 
          RETURNING refresh_token, expires_in`,
         [new Date(Date.now() + duration * 3600000), sessionId]

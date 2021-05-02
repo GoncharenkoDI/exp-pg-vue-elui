@@ -5,6 +5,9 @@ export default {
   actions: {
     async register({ dispatch, commit }, { email, password, name }) {
       try {
+        commit('auth/clearAccessToken', null, { root: true })
+        commit('auth/clearRefreshToken', null, { root: true })
+        commit('auth/clearCurrentUser', null, { root: true })
         const fp = await (await this._vm.$fingerprint).get()
         const result = await dispatch(
           'http/request',
@@ -23,17 +26,14 @@ export default {
             JSON.parse(atob(result.accessToken.split('.')[1])).exp * 1000
           )
         }
-
         const refreshToken = {
-          token: result.refreshToken,
-          expiresIn: new Date(result.expiresIn)
+          token: result.refreshToken.token,
+          expiresIn: new Date(result.refreshToken.expiresIn)
         }
-        commit(
-          'auth/setAccessToken',
-          { token: accessToken.token, expiresIn: accessToken.expiresIn },
-          { root: true }
-        )
+        const user = result.user
+        commit('auth/setAccessToken', accessToken, { root: true })
         commit('auth/setRefreshToken', refreshToken, { root: true })
+        commit('auth/setCurrentUser', user, { root: true })
         return
       } catch (error) {
         if (!error.sender) {

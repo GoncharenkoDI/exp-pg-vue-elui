@@ -18,7 +18,6 @@ Vue.use(fingerprintPlugin)
 
 async function updateUser() {
   if (localStorage.getItem('refreshToken')) {
-    console.log(localStorage.getItem('refreshToken'))
     store.commit(
       'auth/setRefreshToken',
       JSON.parse(localStorage.getItem('refreshToken')),
@@ -36,7 +35,7 @@ async function updateUser() {
 }
 updateUser()
 
-new Vue({
+const app = new Vue({
   router,
   store,
   render: h => h(App)

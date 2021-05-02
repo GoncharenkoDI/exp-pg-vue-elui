@@ -36,10 +36,18 @@ router.post('/register', async (req, res) => {
     const accessToken = jwt.sign({ userId: userId }, jwtOptions.secret, {
       expiresIn: jwtOptions.expiresIn
     })
-
-    res
-      .status(201)
-      .send(JSON.stringify({ accessToken, refreshToken, expiresIn }))
+    /**
+     * @constant { userId, email, user_name, last_login, login_state, session_id, token, create_at, update_at } user
+     */
+    const user = User.getUser(userId)
+    // повертається res.status(200).send(JSON.stringify({ accessToken, refreshToken, expiresIn }))
+    res.status(200).send(
+      JSON.stringify({
+        accessToken,
+        refreshToken: { token: refreshToken, expiresIn: expiresIn },
+        user
+      })
+    )
   } catch (error) {
     if (!error.sender) {
       console.log('POST /api/user/register error: ', error)

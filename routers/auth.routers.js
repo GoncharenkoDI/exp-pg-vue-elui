@@ -7,11 +7,12 @@ const jwt = require('jsonwebtoken')
 
 const router = express.Router()
 
-/** Процедура входу користувача
+/**
+ * @description Процедура входу користувача
  * @method POST
  * @uri /api/auth/login
  * @param { email, password, fingerprint } req.body
- * @returns { accessToken, refreshToken, expiresIn } || status = 500 { message, sender, source} status = 201
+ * @returns { accessToken, refreshToken: {token,expiresIn}, user} || status = 404 || 500 { message, sender, source} status = 201
  */
 router.post('/login', async (req, res) => {
   try {
@@ -44,10 +45,18 @@ router.post('/login', async (req, res) => {
     const accessToken = jwt.sign({ userId: userId }, jwtOptions.secret, {
       expiresIn: jwtOptions.expiresIn
     })
-    // повертається res.status(200).send(JSON.stringify({ accessToken, refreshToken, expiresIn }))
-    res
-      .status(200)
-      .send(JSON.stringify({ accessToken, refreshToken, expiresIn }))
+    /**
+     * @constant { userId, email, user_name, last_login, login_state, session_id, token, create_at, update_at } user
+     */
+    const user = User.getUser(userId)
+    // повертається res.status(200).send(JSON.stringify({ accessToken, refreshToken, user }))
+    res.status(200).send(
+      JSON.stringify({
+        accessToken,
+        refreshToken: { token: refreshToken, expiresIn: expiresIn },
+        user
+      })
+    )
   } catch (error) {
     if (!error.sender) {
       console.log('POST /api/auth/login error: ', error)
@@ -84,8 +93,8 @@ router.put('/token', async (req, res) => {
       res.status(404).send(
         JSON.stringify({
           message: 'Токен з вказаними параметрами не знайдений.',
-          sender: error.sender || 'server',
-          source: error.source || 'PUT /api/user/token'
+          sender: 'server',
+          source: 'PUT /api/user/token'
         })
       )
     }
@@ -101,10 +110,14 @@ router.put('/token', async (req, res) => {
     )
     // отримати інформацію про користувача
     const user = await User.getUser(session.user_id)
-    // повернути refresh-token, термін дії, access-token,  інформацію про користувача
-    res
-      .status(200)
-      .send(JSON.stringify({ accessToken, refreshToken, expiresIn, user }))
+    // повернути refresh-token (токен та термін дії), access-token,  інформацію про користувача
+    res.status(200).send(
+      JSON.stringify({
+        accessToken,
+        refreshToken: { token: refreshToken, expiresIn: expiresIn },
+        user
+      })
+    )
   } catch (error) {
     if (!error.sender) {
       console.log('PUT /api/user/token error: ', error)
